@@ -122,7 +122,7 @@ defimpl Binary.Inspect, for: Atom do
   def inspect(Elixir, _), do: "Elixir"
 
   def inspect(atom, _) do
-    binary = atom_to_binary(atom)
+    binary = atom_to_binary(atom, :latin1)
 
     cond do
       valid_atom_identifier?(binary) ->

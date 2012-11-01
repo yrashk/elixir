@@ -14,8 +14,10 @@
 -define(is_hex(S), ?is_digit(S) orelse (S >= $A andalso S =< $F) orelse (S >= $a andalso S =< $f)).
 -define(is_bin(S), S >= $0 andalso S =< $1).
 -define(is_octal(S), S >= $0 andalso S =< $7).
--define(is_upcase(S), S >= $A andalso S =< $Z).
--define(is_downcase(S), S >= $a andalso S =< $z).
+-define(is_upcase(S), (S >= $A andalso S =< $Z) orelse 
+                      (S >= 16#0400 andalso S =< 16#042F)).
+-define(is_downcase(S), (S >= $a andalso S =< $z) orelse
+                        (S >= 16#0430 andalso S =< 16#045F)).
 -define(is_word(S), ?is_digit(S) orelse ?is_upcase(S) orelse ?is_downcase(S)).
 -define(is_quote(S), S == $" orelse S == $').
 -define(is_space(S), S == $\s; S == $\r; S == $\t; S == $\n).
@@ -454,9 +456,11 @@ unsafe_to_atom(Binary, #scope{existing_atoms_only=true}) when is_binary(Binary) 
   binary_to_existing_atom(Binary, utf8);
 unsafe_to_atom(Binary, #scope{}) when is_binary(Binary) ->
   binary_to_atom(Binary, utf8);
-unsafe_to_atom(List, #scope{existing_atoms_only=true}) when is_list(List) ->
+unsafe_to_atom(List0, #scope{existing_atoms_only=true}) when is_list(List0) ->
+  List = binary_to_list(unicode:characters_to_binary(List0)),
   list_to_existing_atom(List);
-unsafe_to_atom(List, #scope{}) when is_list(List) ->
+unsafe_to_atom(List0, #scope{}) when is_list(List0) ->
+  List = binary_to_list(unicode:characters_to_binary(List0)),
   list_to_atom(List).
 
 collect_modifiers([H|T], Buffer) when ?is_downcase(H) ->
